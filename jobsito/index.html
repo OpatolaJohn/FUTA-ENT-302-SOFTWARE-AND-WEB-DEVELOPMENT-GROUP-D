@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Job Listings</title>
+</head>
+<body>
+  <h1>Available Jobs</h1>
+  <ul id="job-list"></ul>
+
+  <h2>Apply for a Job</h2>
+  <form id="application-form">
+    <label>Job ID: <input type="number" id="jobId" required></label><br>
+    <label>Name: <input type="text" id="name" required></label><br>
+    <label>Email: <input type="email" id="email" required></label><br>
+    <button type="submit">Apply</button>
+  </form>
+
+  <p id="message"></p>
+
+  <script>
+    // Load job listings
+    fetch('http://localhost:3000/jobs')
+      .then(response => response.json())
+      .then(jobs => {
+        const list = document.getElementById('job-list');
+        jobs.forEach(job => {
+          const li = document.createElement('li');
+          li.textContent = `${job.title} at ${job.company} (Job ID: ${job.id})`;
+          list.appendChild(li);
+        });
+      });
+
+    // Submit application
+    document.getElementById('application-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const jobId = document.getElementById('jobId').value;
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+
+      fetch('http://localhost:3000/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobId: parseInt(jobId), name, email })
+      })
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('message').textContent = data.message;
+        })
+        .catch(error => {
+          document.getElementById('message').textContent = 'Error submitting application';
+        });
+    });
+  </script>
+</body>
+</html>
